@@ -52,31 +52,13 @@ def hash_center_type(n_classes, n_bits):
     """
     used in CenterHashing, CSQ, ...
     """
-    lg2 = 0 if n_bits < 1 else int(math.log(n_bits, 2))
-    if 2**lg2 != n_bits:
-        return "random"
-
-    if n_classes <= n_bits:
-        return "ha_d"
-    elif n_classes > n_bits and n_classes <= 2 * n_bits:
-        return "ha_2d"
-    else:
-        return "random"
+    
 
 
 def gen_hash_centers(n_classes, n_bits):
-    t = hash_center_type(n_classes, n_bits)
-    if t == "ha_d":
-        ha_d = torch.from_numpy(hadamard(n_bits)).float()
-        hash_centers = ha_d[0:n_classes]
-    elif t == "ha_2d":
-        ha_d = torch.from_numpy(hadamard(n_bits)).float()
-        hash_centers = torch.cat((ha_d, -ha_d), 0)[0:n_classes]
-    elif t == "random":
-        prob = torch.ones(n_classes, n_bits) * 0.5
-        hash_centers = torch.bernoulli(prob) * 2.0 - 1.0
-    else:
-        raise NotImplementedError
+    '''
+ 
+     '''
     print(f"hash center type: {t}, shape: {hash_centers.shape}")
     return hash_centers
 
@@ -113,57 +95,16 @@ def train_hashing(config,optimizer,optimizer_add, model, centroids, train_loader
         cam_data = grad_cam.calculate_cam(data).detach()
         data = data + 1.2 * cam_data
 
-        for i in input_size_list:
-            resized_img = F.interpolate(data,
-                                        (i, i),
-                                        mode='bilinear',
-                                        align_corners=True
-                                        )
-            resized_img = torch.squeeze(resized_img)
-
-            if (resized_img.ndim == 3):
-                resized_img = resized_img.unsqueeze(0)
-
-            sample_list.append(resized_img)
-        sample_list.append(data)
-        # logits, code = model(sample_list)
-
-
-
-
-
-        # loss = LOSS(code, labels.float())
-
-
-
+        '''
+     
+         '''
         logits, hash_g, cls_g = model(sample_list)
 
-        code_1, code_2 = hash_g[0], hash_g[1]
-        cls_1, cls_2 = cls_g[0], cls_g[1]
-
-        # print("cls_1:", cls_1.shape)
-        # print("cls_2:", cls_2.shape)
-
-        loss1 = LOSS(code_1, labels.float())
-        loss2 = LOSS(code_2, labels.float())
-
-        loss3 = LOSS2(cls_1, labels.float())
-        loss4 = LOSS2(cls_2, labels.float())
-        # print("hash0:", hash_g[0])
-        # print("hash1:", hash_g[1])
-
-        loss0 = criterion(code_2, lab_hash, labels.float())
-
-        # loss = 1.5 * loss1 + 1.5 * loss2 + 0.5 * loss3 +0.5* loss4
-        loss = 0.5 * loss1 + 0.5 * loss2
-
-        # loss =  0.5 * loss3 + 0.5 * loss4
-
-        loss.backward()
-        optimizer.step()
-        # loss = loss2
-
-
+        '''
+     
+         '''
+        
+       
 
 
         hamm_dist = get_hamm_dist(code_2, centroids, normalize=True)
@@ -209,56 +150,17 @@ def test_hashing(config,model, centroids, test_loader, loss_param, return_codes=
     pbar = tqdm(test_loader, desc='Test', ascii=True, bar_format='{l_bar}{bar:10}{r_bar}')
     for i, (data, labels) in enumerate(pbar):
         timer.tick()
-        # ``````````````````````
-        # data = data.to(device)
-        # labels = labels.to(device)
-        # ``````````````````````
+     
         with torch.no_grad():
             data, labels = data.to(device), labels.to(device) # hen trainning MLRS delete this line
 
-            ## CF_VIT process
+          
             sample_list = []
 
             for i in input_size_list:
-                resized_img = F.interpolate(data,
-                                            (i, i),
-                                            mode='bilinear',
-                                            align_corners=True
-                                            )
-                resized_img = torch.squeeze(resized_img)
-
-                if (resized_img.ndim == 3):
-                    resized_img = resized_img.unsqueeze(0)
-
-                sample_list.append(resized_img)
-
-            sample_list.append(data)
-
-            logits, hash_g, cls_g = model(sample_list)
-
-            code_1, code_2 = hash_g[0], hash_g[1]
-            cls_1, cls_2 = cls_g[0], cls_g[1]
-            loss1 = LOSS(code_1, labels.float())
-            loss2 = LOSS(code_2, labels.float())
-
-            loss3 = LOSS2(cls_1, labels.float())
-            loss4 = LOSS2(cls_2, labels.float())
-
-
-            loss0 = criterion(code_2, lab_hash, labels.float())
-            loss = 0.5 * loss1 + 0.5 * loss2 + 0*loss0
-            # loss = 1.5* loss1 + 1.5* loss2 + 0.5* loss3 + 0.5 * loss4
-
-            # loss = 0.5 * loss3 + 0.5 * loss4
-
-            hamm_dist = get_hamm_dist(code_2, centroids, normalize=True) # 哈希码
-
-            acc, cbacc = calculate_accuracy(logits, hamm_dist, labels, loss_param['multiclass'])
-
-            if return_codes:
-                ret_codes.append(code_2)
-                ret_labels.append(labels.float())
-
+                '''
+     
+                 '''
         timer.toc()
         total_timer.toc()
 
@@ -286,26 +188,10 @@ def test_hashing(config,model, centroids, test_loader, loss_param, return_codes=
     return meters
 
 
+    '''
+     dataset preprocessing
+     '''
 
-## MLRS 数据transform
-def prepare_dataloader(config):
-    logging.info('Creating Datasets')
-    if config['dataset'] == 'MLRS' :
-        MLRSs.init('./data/MLRS/', 1000, 5000)
-        transform = transforms.Compose([
-            transforms.Resize(224), # 都改成224
-            transforms.RandomCrop(224), # 改成224
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-        ])
-        trainset = MLRSs('./data/', 'train',transform=transform)
-        testset = MLRSs('./data/', 'query',transform=transform)
-        database = MLRSs('./data/', 'retrieval',transform=transform)
-        train_loader = DataLoader(trainset, config['batch_size'])
-        test_loader =DataLoader(testset, config['batch_size'], shuffle=False, drop_last=False)
-        db_loader = DataLoader(database, config['batch_size'], shuffle=False, drop_last=False)
-        return train_loader ,test_loader , db_loader
     # num_train, num_test, num_database = len(trainset), len(testset), len(database)
     else :
         train_dataset = configs.dataset(config, filename='train.txt', transform_mode='train')
@@ -375,14 +261,9 @@ def main(config):
     if config['wandb_enable']:
         wandb.watch(model)
 
-    ## HYP2
-    # sheet = xlrd.open_workbook('codetable.xlsx').sheet_by_index(0)
-    sheet = xlrd.open_workbook('codetable.xls').sheet_by_index(0)
-    threshold = sheet.row(nbit)[math.ceil(math.log(nclass, 2))].value
-
-    Loss1 = HyP(num_classes=nclass, num_bits=nbit, device=device, threshold=threshold)
-    Loss2 = nn.CrossEntropyLoss()
-    # Loss3 =Triplet(model.hash_g, model.cls_g,label)
+       '''
+     
+         '''
     backbone_lr_scale = 1
     optimizer = Adam([
             {'params': model.get_backbone_params(), 'lr': config['optim_kwargs']['lr'] * backbone_lr_scale},
@@ -418,20 +299,10 @@ def main(config):
         stime=time.time()
         logging.info(f'Epoch [{ep + 1}/{nepochs}]')
         res = {'ep': ep + 1}
-
-
-        # `````````````````````````````````````````````````````````````````````````````````
-        # cam_model = models.resnet18(weights=models.ResNet18_Weights.IMAGENET1K_V1).cuda()
-        cam_model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1).cuda()
-        grad_cam = GradCAM2(cam_model, cam_model.layer4[-1])
-
-
-
-
-        # cam_model = GradCAM2(model, [model.backbone.blocks[-1],model.backbone.norm,model.backbone.head])
-
-        # train_meters = train_hashing(optimizer, model, centroids, train_loader, loss_param, LOSS=Loss1,LOSS2=Loss2,cam_model=cam_model)
-        train_meters = train_hashing(config,optimizer,optimizer_add, model, centroids, train_loader, loss_param, LOSS=Loss1, LOSS2=Loss2,grad_cam=grad_cam)
+       
+        '''
+     
+         '''
         scheduler.step()
         z_time += time.time() - stime
         logging.info(f'z time used: {z_time:.4f} ')
@@ -479,10 +350,8 @@ def main(config):
                 wandb.log(wandb_test, step=res['ep'])
             if best < curr_metric:
                 best = curr_metric
-                # pth占内存！！！！！！！！！
                 io.fast_save(modelsd, f'{logdir}/models/best.pth')
                 io.fast_save(optimsd, f'{logdir}/optims/best.pth')
-                # pth占内存！！！！！！！！！
                 if config['wandb_enable']:
                     wandb.run.summary["best_map"] = best
 
@@ -496,7 +365,6 @@ def main(config):
             # io.fast_save(test_outputs, f'{logdir}/outputs/test_last.pth')
 
         save_now = config['save_interval'] != 0 and (ep + 1) % config['save_interval'] == 0
-        # pth占内存！！！！！！！！！
         if save_now:
             io.fast_save(modelsd, f'{logdir}/models/ep{ep + 1}.pth')
             io.fast_save(optimsd, f'{logdir}/optims/ep{ep + 1}.pth')
@@ -505,11 +373,9 @@ def main(config):
 
         if best < curr_metric:
             best = curr_metric
-            # pth占内存！！！！！！！！！
             io.fast_save(modelsd, f'{logdir}/models/best.pth')
             #
     modelsd = model.state_dict()
-    # pth占内存！！！！！！！！！
     io.fast_save(modelsd, f'{logdir}/models/last.pth')
     io.fast_save(optimsd, f'{logdir}/optims/last.pth')
     #
