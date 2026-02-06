@@ -5,7 +5,7 @@ from torchvision.models import alexnet
 from networks.relative_similarity import RelativeSimilarity
 from networks.ca_net import *
 from utils.attention_zoom import *
-from networks.CF_VIT import cf_deit_small
+from networks.CTF import cf_deit_small
 
 class RelaHash(nn.Module):
     def __init__(self,
