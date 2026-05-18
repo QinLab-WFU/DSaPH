@@ -3,11 +3,11 @@ This paper is accepted for publication in IEEE Journal of Selected Topics in App
 
 ## Training
 ### Dependencies
-We use python to build our code, you need to install the following packages to run
-Python 3.10.0
-Pytorch 2.1.1
-torchvision 0.16.1
-CUDA 11.8
+We use python to build our code, you need to install the following packages to run：
+- Python 3.10.0
+- PyTorch 2.1.1
+- torchvision 0.16.1
+- CUDA 11.8
 ### Processing dataset
 UCMerced: https://www.dropbox.com/s/u83ae1efaah2w9o/UCMercedLanduse.zip
 MLRSNet:  https://data.mendeley.com/datasets/7j9bv9vwsx/3
