@@ -18,7 +18,8 @@ After the dataset has been prepared, you could run the follow command to train.
 
 ## Citation
 If you find this work useful for your research, please use the following.
-> @article{yan2026deep,
+```bibtex
+@article{yan2026deep,
   title={Deep Semantic-Attention Proxy Hashing With Coarse-to-Fine Representation for Multi-Label Remote Sensing Image Retrieval},
   author={Yan, Chunyu and Wang, Lei and Qin, Qibing and Huang, Lei and Zhang, Wenfeng},
   journal={IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing},
