@@ -9,9 +9,9 @@ We use python to build our code, you need to install the following packages to r
 - torchvision 0.16.1
 - CUDA 11.8
 ### Processing dataset
-UCMerced: https://www.dropbox.com/s/u83ae1efaah2w9o/UCMercedLanduse.zip
-MLRSNet:  https://data.mendeley.com/datasets/7j9bv9vwsx/3
-DFC15:  https://drive.google.com/drive/folders/1TKGS6TIRxQ6a7gdaj0cHs-mRCtv_J1HA
+- UCMerced: https://www.dropbox.com/s/u83ae1efaah2w9o/UCMercedLanduse.zip
+- MLRSNet:  https://data.mendeley.com/datasets/7j9bv9vwsx/3
+- DFC15:  https://drive.google.com/drive/folders/1TKGS6TIRxQ6a7gdaj0cHs-mRCtv_J1HA
 ### Start
 After the dataset has been prepared, you could run the follow command to train.
 > python main.py
